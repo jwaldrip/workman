@@ -7,6 +7,7 @@ type Worker struct {
 	tasks     chan Task
 	waitGroup sync.WaitGroup
 	fn        func(Task)
+	spawned   bool
 }
 
 // DefineWorker defines a new worker group
@@ -28,11 +29,15 @@ func (w *Worker) Spawn(count int) *Worker {
 			w.waitGroup.Done()
 		}(i)
 	}
+	w.spawned = true
 	return w
 }
 
 // AddTask to the worker queue
 func (w *Worker) AddTask(task Task) *Worker {
+	if !w.spawned {
+		panic("workers must be spawned before adding tasks!")
+	}
 	w.tasks <- task
 	return w
 }
