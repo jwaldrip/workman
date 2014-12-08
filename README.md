@@ -58,4 +58,4 @@ func main() {
 
 ## Contributing
 
-See [CONTRIBUTING](https://github.com/jwaldrip/odin/blob/master/CONTRIBUTING.md) for details on how to contribute.
+See [CONTRIBUTING](https://github.com/jwaldrip/workman/blob/master/CONTRIBUTING.md) for details on how to contribute.
