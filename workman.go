@@ -4,10 +4,10 @@ import "sync"
 
 // Worker Definition
 type Worker struct {
-	tasks     chan Task
-	waitGroup sync.WaitGroup
-	fn        func(Task)
-	spawned   bool
+	tasks   chan Task
+	wg      sync.WaitGroup
+	fn      func(Task)
+	spawned bool
 }
 
 // DefineWorker defines a new worker group
@@ -20,13 +20,15 @@ func DefineWorker(fn func(Task)) *Worker {
 
 // Spawn some workers
 func (w *Worker) Spawn(count int) *Worker {
+	w.wg.Add(count)
 	for i := 0; i < count; i++ {
-		w.waitGroup.Add(1)
 		go func(worker int) {
-			for task := range w.tasks {
-				w.fn(task)
+			task, ok := <-w.tasks
+			if !ok {
+				w.wg.Done()
+				return
 			}
-			w.waitGroup.Done()
+			w.fn(task)
 		}(i)
 	}
 	w.spawned = true
@@ -55,6 +57,6 @@ func (w *Worker) Finish() {
 
 // Wait for the workers to finish
 func (w *Worker) Wait() *Worker {
-	w.waitGroup.Wait()
+	w.wg.Wait()
 	return w
 }
