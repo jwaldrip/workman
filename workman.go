@@ -23,12 +23,10 @@ func (w *Worker) Spawn(count int) *Worker {
 	w.wg.Add(count)
 	for i := 0; i < count; i++ {
 		go func(worker int) {
-			task, ok := <-w.tasks
-			if !ok {
-				w.wg.Done()
-				return
+			for task := range w.tasks {
+				w.fn(task)
 			}
-			w.fn(task)
+			w.wg.Done()
 		}(i)
 	}
 	w.spawned = true
