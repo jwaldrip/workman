@@ -7,7 +7,7 @@ import (
 	"github.com/jwaldrip/workman"
 )
 
-var worker = workman.DefineWorker(func(context workman.Task) {
+var worker = workman.New(func(context workman.Task) {
 	str := context.(string)
 	fmt.Println(str)
 	time.Sleep(time.Second)

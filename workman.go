@@ -4,14 +4,13 @@ import "sync"
 
 // Worker Definition
 type Worker struct {
-	tasks   chan Task
-	wg      sync.WaitGroup
-	fn      func(Task)
-	spawned bool
+	tasks chan Task
+	wg    sync.WaitGroup
+	fn    func(Task)
 }
 
-// DefineWorker defines a new worker group
-func DefineWorker(fn func(Task)) *Worker {
+// New defines a new workman group
+func New(fn func(Task)) *Worker {
 	return &Worker{
 		tasks: make(chan Task),
 		fn:    fn,
@@ -29,32 +28,16 @@ func (w *Worker) Spawn(count int) *Worker {
 			w.wg.Done()
 		}(i)
 	}
-	w.spawned = true
 	return w
 }
 
 // AddTask to the worker queue
-func (w *Worker) AddTask(task Task) *Worker {
-	if !w.spawned {
-		panic("workers must be spawned before adding tasks!")
-	}
+func (w *Worker) AddTask(task Task) {
 	w.tasks <- task
-	return w
-}
-
-// CloseTasks tells us that we are donw with our tasks
-func (w *Worker) CloseTasks() *Worker {
-	close(w.tasks)
-	return w
 }
 
 // Finish waits for all the workers to finish
 func (w *Worker) Finish() {
-	w.CloseTasks().Wait()
-}
-
-// Wait for the workers to finish
-func (w *Worker) Wait() *Worker {
+	close(w.tasks)
 	w.wg.Wait()
-	return w
 }
